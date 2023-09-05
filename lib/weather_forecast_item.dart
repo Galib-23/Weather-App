@@ -13,6 +13,7 @@ class HourlyForecastItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: const Color.fromARGB(255, 102, 218, 238),
       elevation: 6,
       child: Container(
         width: 100,
@@ -44,7 +45,7 @@ class HourlyForecastItem extends StatelessWidget {
               height: 8,
             ),
             Text(
-              temperature,
+              '$temperature °C',
             ),
           ],
         ),

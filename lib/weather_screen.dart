@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:weather_app/additional_info_item.dart';
 import 'package:weather_app/crypts.dart';
 import 'weather_forecast_item.dart';
@@ -17,10 +18,10 @@ class WeatherScreen extends StatefulWidget {
 class _WeatherScreenState extends State<WeatherScreen> {
   Future<Map<String, dynamic>> getCurrentWeather() async {
     try {
-      String cityName = 'London';
+      String cityName = 'Rajshahi';
       final res = await http.get(
         Uri.parse(
-            'https://api.openweathermap.org/data/2.5/forecast?q=$cityName,uk&APPID=$openWeatherAPIKey'),
+            'https://api.openweathermap.org/data/2.5/forecast?q=$cityName&APPID=$openWeatherAPIKey'),
       );
       final data = jsonDecode(res.body);
       if (data['cod'] != '200') {
@@ -35,7 +36,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color.fromARGB(255, 158, 217, 235),
       appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 34, 189, 216),
         title: const Text(
           'Weather App',
           style: TextStyle(
@@ -46,7 +49,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () {},
+            onPressed: () {
+              setState(() {});
+            },
           ),
         ],
       ),
@@ -60,7 +65,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
             return Center(child: Text(snapshot.error.toString()));
           }
           final data = snapshot.data!;
-          final currentTemp = data['list'][0]['main']['temp'];
+          final currentTemp =
+              (data['list'][0]['main']['temp'] - 273).toStringAsFixed(2);
           final currentSky = data['list'][0]['weather'][0]['main'];
           final currentPressure = data['list'][0]['main']['pressure'];
           final currentWindSpeed = data['list'][0]['wind']['speed'];
@@ -74,6 +80,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: Card(
+                    color: const Color.fromARGB(255, 102, 218, 238),
                     elevation: 16,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
@@ -89,7 +96,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           child: Column(
                             children: [
                               Text(
-                                '$currentTemp k',
+                                '$currentTemp °C',
                                 style: const TextStyle(
                                   fontSize: 32,
                                   fontWeight: FontWeight.bold,
@@ -99,7 +106,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                 height: 16,
                               ),
                               Icon(
-                                currentSky == 'Cloud' || currentSky == 'rain'
+                                currentSky == 'Cloud' || currentSky == 'Rain'
                                     ? Icons.cloud
                                     : Icons.sunny,
                                 size: 64,
@@ -160,17 +167,22 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     scrollDirection: Axis.horizontal,
                     itemCount: 5,
                     itemBuilder: (context, index) {
+                      final time =
+                          DateTime.parse(data['list'][index + 1]['dt_txt']);
                       return HourlyForecastItem(
-                        time: data['list'][index + 1]['dt'].toString(),
-                        icon: data['list'][index + 1]['weather'][0]['main'] ==
-                                    'Clouds' ||
-                                data['list'][index + 1]['weather'][0]['main'] ==
-                                    'Rain'
-                            ? Icons.cloud
-                            : Icons.sunny,
-                        temperature:
-                            data['list'][index + 1]['main']['temp'].toString(),
-                      );
+                          time: DateFormat.Hm().format(time),
+                          icon: data['list'][index + 1]['weather'][0]['main'] ==
+                                      'Clouds' ||
+                                  data['list'][index + 1]['weather'][0]
+                                          ['main'] ==
+                                      'Rain'
+                              ? Icons.cloud
+                              : Icons.sunny,
+                          temperature:
+                              (data['list'][index + 1]['main']['temp'] - 273)
+                                  .toStringAsFixed(2)
+                          // .toString(),
+                          );
                     },
                   ),
                 ),
